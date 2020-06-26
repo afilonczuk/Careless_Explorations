@@ -6,14 +6,14 @@ library(DT)
 
 #Read data
 dat <- read_csv("~/Desktop/PEMLab copy/pilot5_merged_anon.csv")
-#t1_ma_ t1_macro_ t2_bfi_ t3_micro_ t4_math_recog t4_micro_
-
-
- carelesstable <- function(dat2, factors, validityitem = NULL, correctanswer = 0){
+   #t1_ma_ t1_macro_ t2_bfi_ t3_micro_ t4_math_recog t4_micro_
    #validityitem <- dat$t1_validity_1
    #correctanswer=5
+
+#############Function that generates statistics that may indicate carelessness###################
+ carelesstable <- function(dat2, factors = ncol(dat2), validityitem = NULL, correctanswer = 0){
   #dat2 is the subsetted data
-  #validityitem = vector of responses to the validity item from the administration subsetted
+  #validityitem = vector of responses to the validity item 
   #correctanswer = the correct answer to the validity item
   #factors	= a vector of integers specifying the length of each factor in the dataset
    if (is.null(validityitem)){
@@ -31,14 +31,14 @@ dat <- read_csv("~/Desktop/PEMLab copy/pilot5_merged_anon.csv")
              }
          }
    }
-    #IRV 
+    #IRV - measure of variability
     irv(dat2)
     hist(irv(dat2))
     dat2.irv <- irv(dat2, split = TRUE, num.split = 4)
    
     out <- cbind(val, dat2.irv$irvTotal, dat2.irv$irv1, dat2.irv$irv2, dat2.irv$irv3, dat2.irv$irv4)
     
-    #Longstring
+    #Longstring - calculates the longest string of same consecutive responses, and the average length of same consecutive responses
     longstring(dat2)
     dat2.longstring <- longstring(dat2, avg = TRUE)
     hist(longstring(dat2))
@@ -50,12 +50,11 @@ dat <- read_csv("~/Desktop/PEMLab copy/pilot5_merged_anon.csv")
     dat2.mahad <- mahad(dat2, plot = TRUE, flag = TRUE, confidence = 0.99, na.rm = TRUE)
     out3 <- cbind(out2, dat2.mahad$raw, dat2.mahad$flagged)
      
-    #EvenOdd
+    #EvenOdd - correlates the even-numbered items with the odd-numbered items
     dat2.eo <- evenodd(dat2, factors, diag = FALSE)
-    #question - so I had the first factor as being math attitudes (19 items) and the second factor as being macro (33 items); is that correct? 
-    # it's giving me al correlations of 1 or -1 perfectly; idk
     
-    #psychometric synonym/antonym score
+    #psychometric synonym/antonym score - calculates the responder's correlation between pairs of items that correlate beyond .5 (synonyms)
+    #can also be done for antonyms (best before reverse coding)
     dat2.psychsyn <- psychsyn(dat2, critval = 0.5, anto = FALSE, diag = FALSE)
     out4 <- cbind(out3, dat2.eo, dat2.psychsyn)
     colnames(out4) <- cbind("Validity Item", "irvTotal", "irv1", "irv2", "irv3", "irv4", "Longest String", "Average String Length", "Mahalanobis D", "Flagged Potential Outliers", "Even-Odd Score", "Synonyms")
@@ -69,7 +68,9 @@ dat <- read_csv("~/Desktop/PEMLab copy/pilot5_merged_anon.csv")
   #correlations between all possible item pairs and order them by the magnitude of the correlation
   psychsyn_critval(dat2, anto = TRUE)
   psychsyn_critval(dat2, anto = FALSE)
-  
+
+#####################################################################################################
+#####  Implementing carelesstable() on pilot 5 data
 #####################################################################################################
 #Subset Data: t1 responses
 #dat2 has survey data from t1
@@ -150,7 +151,8 @@ boxplot(longstring(dat5))
 boxplot(dat5.longstring$avgstr)
 
 #######################################################################################################
-##Color flagged responses
+#### Flag careless responses (typically outliers) in red in an html file
+#######################################################################################################
 flag.table <- function(dat.table){
  
   datatable(dat.table, rownames = FALSE) %>%
@@ -181,6 +183,9 @@ flag.table <- function(dat.table){
   
 }
 
+#############################################################################
+## Implement flag.table() on the pilot 5 data
+#############################################################################
 
 t1.flagged <- flag.table(t1.carelesstable)
 t2.flagged <- flag.table(t2.carelesstable)
@@ -189,7 +194,8 @@ t4.flagged <- flag.table(t4.carelesstable)
 
 
 ##########################################################################################
-
+#### Generate the rates of careless responders
+####################################################################
 
 careless.rates <- function(dat.table){
   out <- matrix(0, nrow = 1, ncol = ncol(dat.table))
@@ -271,23 +277,25 @@ careless.rates <- function(dat.table){
   colnames(out) <- colnames(dat.table)
   return(out)
   }
+
+############################################################################################################
+######## Implement careless.rates() on pilot 5 data
+############################################################################################################
  
  t1.rates <- careless.rates(t1.carelesstable)
  t2.rates <- careless.rates(t2.carelesstable)
  t3.rates <- careless.rates(t3.carelesstable)
  t4.rates <- careless.rates(t4.carelesstable)
- 
-  write.table(signif(t1.rates, 4), quote = FALSE)
-  write.table(signif(t2.rates, 4), quote = FALSE)
-  write.table(signif(t3.rates, 4), quote = FALSE)
-  write.table(signif(t4.rates, 4), quote = FALSE)
-  
-############################################################################################################
-  write.table(dat2[69,40:52], quote = FALSE)
-  write.table(dat2[128, 40:52], quote = FALSE)
-  
+   
  write.table( signif(t1.rates, 4), sep = ",", quote = FALSE)
  write.table( signif(t2.rates, 4), sep = ",", quote = FALSE)
  write.table( signif(t3.rates, 4), sep = ",", quote = FALSE)
  write.table( signif(t4.rates, 4), sep = ",", quote = FALSE)
+
+############################################################################################################
+######## Example response vectors that were flagged
+############################################################################################################
+
+  write.table(dat2[69,40:52], quote = FALSE)
+  write.table(dat2[128, 40:52], quote = FALSE)
  
