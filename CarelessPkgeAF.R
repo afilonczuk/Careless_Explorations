@@ -8,8 +8,8 @@ library(corrplot)
 #Read data
 dat <- read_csv("~/Desktop/PEMLab copy/pilot5_merged_anon.csv")
 #t1_ma_ t1_macro_ t2_bfi_ t3_micro_ t4_math_recog t4_micro_
-
-###Create a table calculating each measure of carelessness for each responder
+#####################################################################################################
+###Function: Create a table calculating each measure of carelessness for each responder
  carelesstable <- function(dat2, factors = ncol(dat2), validityitem = NULL, correctanswer = 0 ){
   #dat2 is the subsetted data
   #validityitem = vector of responses to the validity item from the administration subsetted
@@ -151,7 +151,7 @@ corrplot(corPlot(t3.carelesstable), tl.cex = .5)
 corrplot(corPlot(t4.carelesstable), tl.cex = .5)
 
 #######################################################################################################
-##Color flagged measures red in tabe of carelessness
+##Function: Color flagged measures red in tabe of carelessness
 redflag.table <- function(dat.table){
  
   datatable(dat.table, rownames = FALSE) %>%
@@ -188,7 +188,7 @@ t3.flagged <- redflag.table(t3.carelesstable)
 t4.flagged <- redflag.table(t4.carelesstable)
 
 ##########################################################################################
-##Mark flagged measures with "1"; unflagged measures with "0"
+##Function: Mark flagged measures with "1"; unflagged measures with "0"
 flagged.table <- function(dat.table){
   out <- matrix(0, nrow = nrow(dat.table), ncol = ncol(dat.table))
   out[,1] <- dat.table[,1]
@@ -242,7 +242,7 @@ t3.binary <-flagged.table(t3.carelesstable)
 t4.binary <-flagged.table(t4.carelesstable)
 
 ##########################################################################################
-##Calculate the rate of carelessness within each measure
+##Function: Calculate the rate of carelessness within each measure
 careless.rates <- function(carelesstable){
   flagged<- flagged.table(carelesstable)
   out <- colSums(flagged, na.rm = TRUE)/nrow(flagged)
